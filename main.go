@@ -1,10 +1,12 @@
 package main
 
 import (
+	"bytes"
 	"context"
 	"encoding/json"
 	"fmt"
 	"log"
+	"net/http"
 	"os"
 
 	"github.com/aws/aws-lambda-go/events"
@@ -192,13 +194,40 @@ func sendGroupMeMessage(groupID, text string) error {
 		return fmt.Errorf("GROUPME_BOT_ID not set")
 	}
 
-	// In production, this would make an HTTP POST to GroupMe API
-	// For now, we'll just log it
-	log.Printf("Sending message to group %s: %s", groupID, text)
+	// GroupMe bot post API endpoint
+	apiURL := "https://api.groupme.com/v3/bots/post"
 
-	// TODO: Implement actual GroupMe API call
-	// POST to https://api.groupme.com/v3/bots/post
-	// with JSON body: {"bot_id": botID, "text": text}
+	// Prepare the message payload
+	payload := map[string]string{
+		"bot_id": botID,
+		"text":   text,
+	}
 
+	jsonPayload, err := json.Marshal(payload)
+	if err != nil {
+		return fmt.Errorf("error marshaling payload: %v", err)
+	}
+
+	// Create HTTP request
+	req, err := http.NewRequest("POST", apiURL, bytes.NewBuffer(jsonPayload))
+	if err != nil {
+		return fmt.Errorf("error creating request: %v", err)
+	}
+
+	req.Header.Set("Content-Type", "application/json")
+
+	// Send the request
+	client := &http.Client{}
+	resp, err := client.Do(req)
+	if err != nil {
+		return fmt.Errorf("error sending request: %v", err)
+	}
+	defer resp.Body.Close()
+
+	if resp.StatusCode != http.StatusAccepted && resp.StatusCode != http.StatusOK {
+		return fmt.Errorf("GroupMe API returned status: %d", resp.StatusCode)
+	}
+
+	log.Printf("Successfully sent message to GroupMe group %s: %s", groupID, text)
 	return nil
 }
