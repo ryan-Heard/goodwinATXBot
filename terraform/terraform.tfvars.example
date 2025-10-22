@@ -1,0 +1,15 @@
+# Example Terraform variables file
+# Copy this file to terraform.tfvars and fill in your values
+# DO NOT commit terraform.tfvars to version control
+
+groupme_bot_id   = "your-groupme-bot-id-here"
+groupme_group_id = "your-groupme-group-id-here"
+
+# Optional: Customize AWS region (defaults to us-east-1)
+# aws_region = "us-east-1"
+
+# Optional: Customize Lambda function name (defaults to goodwin-atx-bot)
+# lambda_function_name = "goodwin-atx-bot"
+
+# Optional: Customize schedule (defaults to Monday 2 PM UTC)
+# schedule_expression = "cron(0 14 ? * MON *)"
