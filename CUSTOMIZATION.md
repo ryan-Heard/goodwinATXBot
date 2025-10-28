@@ -6,7 +6,7 @@ This document provides examples for customizing the Goodwin ATX Bot to better su
 
 ### Example 1: Context-Aware Responses
 
-Modify the `generateQuestionResponse()` function in `main.go`:
+Modify the `generateQuestionResponse()` function in `code/main.go`:
 
 ```go
 func generateQuestionResponse(question string) string {
@@ -100,7 +100,7 @@ func generateWeeklySuggestion() string {
 
 ### Example 2: Time-Based Rotation
 
-Add this import at the top of `main.go`:
+Add this import at the top of `code/main.go`:
 ```go
 import (
     "time"
@@ -160,7 +160,7 @@ func generateWeeklySuggestion() string {
 
 ### Example: React to Specific Keywords
 
-Modify `handleGroupMeCallback()` in `main.go`:
+Modify `handleGroupMeCallback()` in `code/main.go`:
 
 ```go
 func handleGroupMeCallback(ctx context.Context, request events.APIGatewayProxyRequest) (events.APIGatewayProxyResponse, error) {

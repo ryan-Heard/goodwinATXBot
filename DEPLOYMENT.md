@@ -145,7 +145,7 @@ make deploy
 
 ### Update Bot Responses
 
-Edit `main.go`:
+Edit `code/main.go`:
 - `generateQuestionResponse()` - customize question responses
 - `generateWeeklySuggestion()` - customize weekly messages
 
@@ -212,7 +212,7 @@ Ensure your AWS credentials have permissions for:
 To update the bot code:
 
 ```bash
-# Make your changes to main.go
+# Make your changes to code/main.go
 # ...
 
 # Rebuild and redeploy

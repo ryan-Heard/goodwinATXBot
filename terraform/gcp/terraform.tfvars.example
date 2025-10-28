@@ -1,0 +1,10 @@
+project_id = "your-gcp-project-id"
+region     = "us-central1"
+
+# GroupMe Configuration
+groupme_bot_id    = "your-groupme-bot-id"
+groupme_group_id  = "your-groupme-group-id"
+
+# Optional customizations
+service_name      = "goodwin-atx-bot"
+schedule_timezone = "America/Chicago"
