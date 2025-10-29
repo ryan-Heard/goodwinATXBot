@@ -8,12 +8,12 @@ IMAGE_TAG ?= latest
 
 # Build the Lambda function for AWS Lambda (Linux)
 build:
-	GOOS=linux GOARCH=amd64 CGO_ENABLED=0 go build -o bootstrap code/main.go
+	GOOS=linux GOARCH=amd64 CGO_ENABLED=0 go build -o bootstrap ./code
 	@echo "Build complete: bootstrap"
 
 # Build for GCP Cloud Run
 build-gcp:
-	CGO_ENABLED=0 GOOS=linux go build -o main code/main.go
+	CGO_ENABLED=0 GOOS=linux go build -o main ./code
 	@echo "Build complete for GCP: main"
 
 # Build Docker image for GCP Cloud Run
@@ -64,9 +64,18 @@ destroy:
 destroy-gcp:
 	cd terraform/gcp && terraform destroy -auto-approve
 
-# Run tests
+# Run unit tests
 test:
-	go test ./...
+	@echo "Running unit tests..."
+	go test ./code -v
+
+# Run unit tests with coverage
+test-coverage:
+	@echo "Running unit tests with coverage..."
+	go test ./code -v -cover
+
+# Run all tests (unit + integration)
+test-all: test test-local
 
 # Run local server for testing
 test-local:
@@ -80,7 +89,7 @@ run-local:
 	@echo "Starting local server on port 8080..."
 	@echo "Visit http://localhost:8080/health to check status"
 	@echo "Press Ctrl+C to stop"
-	PORT=8080 go run code/main.go
+	PORT=8080 go run ./code
 
 # Test individual endpoints with curl
 test-health:

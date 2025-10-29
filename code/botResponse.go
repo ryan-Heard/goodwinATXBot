@@ -9,75 +9,95 @@ import (
 	"os"
 )
 
-// contains checks if a string contains a substring (case-insensitive)
+// containsQuestion checks if a message contains a question
+func containsQuestion(text string) bool {
+	if text == "" {
+		return false
+	}
+
+	// Convert to lowercase for case-insensitive matching
+	lowerText := toLower(text)
+
+	// Check for question mark
+	if contains(lowerText, "?") {
+		return true
+	}
+
+	// Check for common question words
+	questionWords := []string{
+		"what is", "when", "where", "who",
+		"why", "how", "is there",
+		"can we",
+	}
+	for _, word := range questionWords {
+		if contains(lowerText, word) {
+			return true
+		}
+	}
+
+	return false
+}
+
+// Helper function to convert string to lowercase
+func toLower(s string) string {
+	result := ""
+	for _, r := range s {
+		if r >= 'A' && r <= 'Z' {
+			result += string(r + 32)
+		} else {
+			result += string(r)
+		}
+	}
+	return result
+}
+
+// Helper function to check if string contains substring (case-insensitive)
 func contains(s, substr string) bool {
-	sLower := toLower(s)
-	substrLower := toLower(substr)
-	for i := 0; i <= len(sLower)-len(substrLower); i++ {
-		if sLower[i:i+len(substrLower)] == substrLower {
+	if substr == "" {
+		return true
+	}
+	if len(s) < len(substr) {
+		return false
+	}
+
+	s = toLower(s)
+	substr = toLower(substr)
+
+	for i := 0; i <= len(s)-len(substr); i++ {
+		match := true
+		for j := 0; j < len(substr); j++ {
+			if s[i+j] != substr[j] {
+				match = false
+				break
+			}
+		}
+		if match {
 			return true
 		}
 	}
 	return false
 }
 
-// toLower converts a string to lowercase
-func toLower(s string) string {
-	result := make([]byte, len(s))
-	for i := 0; i < len(s); i++ {
-		c := s[i]
-		if c >= 'A' && c <= 'Z' {
-			result[i] = c + 32
-		} else {
-			result[i] = c
-		}
-	}
-	return string(result)
-}
-
-// containsQuestion checks if the text contains question indicators
-func containsQuestion(text string) bool {
-	return len(text) > 0 && (text[len(text)-1] == '?' ||
-		contains(text, "what") ||
-		contains(text, "when") ||
-		contains(text, "where") ||
-		contains(text, "who") ||
-		contains(text, "why") ||
-		contains(text, "how"))
-}
-
-// Group Routing Response logic here
-func questionResponse(message GroupMeMessage) string {
-	// Simple keyword-based response logic
-	if message.Text == "Hello" || message.Text == "Hi" {
-		return fmt.Sprintf("Hello, %s! How can I assist you today?", message.Name)
-	} else if message.Text == "Help" {
-		return "Sure! You can ask me about our services, opening hours, or any other questions you have."
-	} else if bytes.Contains([]byte(message.Text), []byte("guest parking code")) {
-		return "Guest parking vehicles can be https://www.register2park.com/register. " +
-			"Use code GOODWIN123 for free parking. GwPark01"
-	}
-
-	return ""
-}
-
-// generateQuestionResponse generates a helpful response to a question
+// generateQuestionResponse generates an appropriate response for a question
 func generateQuestionResponse(question string) string {
-	// Simple response logic - can be enhanced with more sophisticated AI/rules
-	responses := []string{
-		"That's a great question! Let me think about that...",
-		"Interesting question! Here's what I know...",
-		"Good question! Based on what I know...",
-		"Let me help you with that!",
+	if question == "" {
+		return ""
 	}
 
-	// Use a simple hash to pick a response
-	hash := 0
-	for _, c := range question {
-		hash += int(c)
+	lowerQuestion := toLower(question)
+
+	// Check for parking-related questions
+	if contains(lowerQuestion, "parking") && contains(lowerQuestion, "code") {
+		return "The guest parking code for Goodwin ATX is: GwPark01. Visit https://www.register2park.com/register to register your license plate for free parking."
 	}
 
-	return responses[hash%len(responses)]
+	// Check for weekly activities/events questions
+	if contains(lowerQuestion, "week") || contains(lowerQuestion, "happening") {
+		return generateWeeklySuggestion()
+	}
+
+	// Default response for other questions
+	return ""
 }
 
 // sendGroupMeMessage sends a message to the GroupMe group
@@ -85,6 +105,12 @@ func sendGroupMeMessage(groupID, text string) error {
 	botID := os.Getenv("GROUPME_BOT_ID")
 	if botID == "" {
 		return fmt.Errorf("GROUPME_BOT_ID not set")
+	}
+
+	// Check if we're in test mode (using dummy credentials)
+	if botID == "test-bot-id" {
+		log.Printf("🧪 TEST MODE: Would send message to GroupMe group %s: %s", groupID, text)
+		return nil
 	}
 
 	// GroupMe bot post API endpoint
